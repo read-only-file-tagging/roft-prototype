@@ -34,10 +34,7 @@ object GenTags {
           parts == that.parts
       case _ => false
     }
-    override def hashCode(): Int = {
-      val state = Seq(parts)
-      state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
-    }
+    override def hashCode(): Int = parts.hashCode()
   }
   object Tag {
     object TagRoot extends Tag(Vector.empty)
