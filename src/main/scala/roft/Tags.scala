@@ -23,11 +23,17 @@ case class Tags(version: String, context: Option[Context] = None, data: Map[Tag,
   override def withContext(context: Option[Context]): Tags = copy(context = context)
 
   override def allTags: Set[Tag] = data.keySet
-  override def filesForTag(tag: Tag): Set[Path] = data.getOrElse(tag, Set.empty)
-  override def tagsForFile(file: Path): Set[Tag] = data.collect {
+  override def PathsForTag(tag: Tag): Set[Path] = data.getOrElse(tag, Set.empty)
+  override def tagsForPath(file: Path): Set[Tag] = data.collect {
     case (tag, paths) if paths(file)
     => tag
   }.toSet
 }
 
-object Tags
+object Tags {
+  def apply(version: String, context: Context, tags: (Tag, Path)*): Tags = apply(version, tags: _*).withContext(Some(context))
+  def apply(version: String, entries: (Tag, Path)*): Tags = {
+    val map = entries.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    new Tags(version, data = map)
+  }
+}

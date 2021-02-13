@@ -3,24 +3,9 @@ package roft
 import org.specs2.mutable.Specification
 import roft.GenTags.Tag
 
-import java.io.File
-import java.nio.file.Files
-
-class TagStoreSpec extends Specification {
-  private def examplesStore(i: Int) = {
-    TagStore(new File("src/test/resources/stores/" + i))
-  }
-
-  "store 1" >> {
-    val store = examplesStore(1)
-    "should have the correct versions" >> {
-      store.version must_== "0.1"
-    }
-  }
-
-  "a fresh store" >> {
-    val tempDirectory = Files.createTempDirectory("store")
-    val store = TagStore(tempDirectory.toFile)
+class TagSpec extends Specification {
+  "a tags variable" >> {
+    var store = Tags("")
 
     "have a blank version" >> {
       store.version must_== ""
@@ -29,7 +14,7 @@ class TagStoreSpec extends Specification {
     "handle version updates" >> {
       val newVersion = "test123"
       store.version must_!= newVersion
-      store.version = newVersion
+      store = store.withVersion(newVersion)
       store.version must_== newVersion
     }
 
@@ -59,10 +44,6 @@ class TagStoreSpec extends Specification {
       store(Tag("2")) must_== Set("two")
       store(Tag("one")) must_== Set("one")
       store(Tag("nope")) must_== Set()
-    }
-
-    "cleanup" >> {
-      Files.deleteIfExists(tempDirectory)
     }
   }
 }

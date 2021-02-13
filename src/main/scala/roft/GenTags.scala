@@ -6,12 +6,17 @@ trait GenTags[T <: ImmutableTags[T]] {
   def version: String
   def context: Option[Context]
   def allTags: Set[Tag]
-  def filesForTag(tag: Tag): Set[Path]
-  def tagsForFile(file: Path): Set[Tag]
+  def PathsForTag(tag: Tag): Set[Path]
+  def tagsForPath(file: Path): Set[Tag]
+  def entries: Iterable[(Tag,Path)] = for {
+    tag <- allTags
+    path <- PathsForTag(tag)
+  } yield tag -> path
+
   def snapshot: ImmutableTags[T]
 
-  def apply(tag: Tag): Set[Path] = filesForTag(tag)
-  def apply(file: Path): Set[Tag] = tagsForFile(file)
+  def apply(tag: Tag): Set[Path] = PathsForTag(tag)
+  def apply(file: Path): Set[Tag] = tagsForPath(file)
 }
 
 object GenTags {
