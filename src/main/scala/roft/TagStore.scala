@@ -7,25 +7,27 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
   def initialized: Boolean = exists(dir)
   val versionFile: Path = dir / "version"
 
-  override def +=(fileWithTag: (TagPath, Tag)): Unit = ???
-  override def -=(fileWithTag: (TagPath, Tag)): Unit = ???
-  override def version_=(version: String): Unit = {
-    write(versionFile, version, createFolders = true)
-  }
-  override def context_=(context: Option[Context]): Unit = ???
-  override def version: String = {
-    if (exists(versionFile) && versionFile.isFile) {
+  override def snapshot: Tags = {
+    def readVersion = if (exists(versionFile) && versionFile.isFile) {
       read ! versionFile
     } else {
       ""
     }
+    Tags(readVersion)
   }
-  override def context: Option[Context] = None
-  override def allTags: Set[Tag] = ???
-  override def filesForTag(tag: Tag): Set[TagPath] = ???
-  override def tagsForFile(file: TagPath): Set[Tag] = ???
-  override def snapshot: Tags = ???
-  override def replaceWith[A <: ImmutableTags[A]](immutableTags: ImmutableTags[A]): Unit = ???
+  override def replaceWith[A <: ImmutableTags[A]](immutableTags: ImmutableTags[A]): Unit = {
+    write(versionFile, immutableTags.version, createFolders = true)
+  }
+
+  override def +=(fileWithTag: (TagPath, Tag)): Unit = replaceWith(snapshot + fileWithTag)
+  override def -=(fileWithTag: (TagPath, Tag)): Unit = replaceWith(snapshot - fileWithTag)
+  override def version_=(version: String): Unit = replaceWith(snapshot.withVersion(version))
+  override def context_=(context: Option[Context]): Unit = replaceWith(snapshot.withContext(context))
+  override def version: String = snapshot.version
+  override def context: Option[Context] = snapshot.context
+  override def allTags: Set[Tag] = snapshot.allTags
+  override def filesForTag(tag: Tag): Set[TagPath] = snapshot.filesForTag(tag)
+  override def tagsForFile(file: TagPath): Set[Tag] = snapshot.tagsForFile(file)
 }
 
 object TagStore {
