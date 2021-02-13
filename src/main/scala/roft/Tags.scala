@@ -19,7 +19,7 @@ case class Tags(version: String, context: Option[Context] = None, data: Map[Tag,
       copy(data = data + (tag -> newPaths))
     }
   }
-  override def withVersion(version: Tag): Tags = copy(version = version)
+  override def withVersion(version: String): Tags = copy(version = version)
   override def withContext(context: Option[Context]): Tags = copy(context = context)
 
   override def allTags: Set[Tag] = data.keySet

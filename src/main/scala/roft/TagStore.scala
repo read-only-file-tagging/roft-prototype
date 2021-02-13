@@ -9,7 +9,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
 
   override def +=(fileWithTag: (TagPath, Tag)): Unit = ???
   override def -=(fileWithTag: (TagPath, Tag)): Unit = ???
-  override def version_=(version: Tag): Unit = {
+  override def version_=(version: String): Unit = {
     write(versionFile, version, createFolders = true)
   }
   override def context_=(context: Option[Context]): Unit = ???
