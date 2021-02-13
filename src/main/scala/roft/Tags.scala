@@ -1,35 +1,35 @@
 package roft
 
+import roft.GenTags.{Path, Tag}
+
 import java.io.File
 
-trait Tags {
-  def version: String
-  def root: File
-  def allTags: Set[String]
-  def filesForTag(tag: String): Set[File]
-  def tagsForFile(file: File): Set[String]
-  def snapshot: ImmutableTags[_]
+case class Tags(version: String, root: Path, data: Map[Tag, Set[Path]] = Map.empty) extends ImmutableTags[Tags] {
+  override def +(fileWithTag: (Path, Tag)): Tags = {
+    val (path, tag) = fileWithTag
+    val oldPaths = data.getOrElse(tag, Set.empty)
+    val newPaths = oldPaths + path
+    copy(data = data + (tag -> newPaths))
+  }
+  override def -(fileWithTag: (Path, Tag)): Tags = {
+    val (path, tag) = fileWithTag
+    val oldPaths = data.getOrElse(tag, Set.empty)
+    val newPaths = oldPaths - path
+    if (newPaths.isEmpty) {
+      copy(data = data - tag)
+    } else {
+      copy(data = data + (tag -> newPaths))
+    }
+  }
+  override def withVersion(version: Tag): Tags = copy(version = version)
+  override def withRoot(root: Path): Tags = copy(root = root)
 
-  def apply(tag: String): Set[File] = filesForTag(tag)
-  def apply(file: File): Set[String] = tagsForFile(file)
+  override def allTags: Set[Tag] = data.keySet
+  override def filesForTag(tag: Tag): Set[Path] = data.getOrElse(tag, Set.empty)
+  override def tagsForFile(file: Path): Set[Tag] = data.collect {
+    case (tag, paths) if paths(file)
+    => tag
+  }.toSet
 }
 
-trait MutableTags extends Tags {
-  def +=(fileWithTag: (File, String)): Unit
-  def -=(fileWithTag: (File, String)): Unit
-  def version_=(version: String): Unit
-  def root_=(root: File): Unit
-}
-
-trait ImmutableTags[T <: ImmutableTags[T]] extends Tags {
-  def +(fileWithTag: (File, String)): T
-  def -(fileWithTag: (File, String)): T
-  def withVersion(version: String): T
-  def withRoot(root: File): T
-
-  override def snapshot: ImmutableTags[T] = this
-}
-
-object Tags {
-  def read(store: File): Tags = ???
-}
+object Tags
