@@ -2,9 +2,7 @@ package roft
 
 import roft.GenTags.{Path, Tag}
 
-import java.io.File
-
-case class Tags(version: String, root: Path, data: Map[Tag, Set[Path]] = Map.empty) extends ImmutableTags[Tags] {
+case class Tags(version: String, context: Option[Context] = None, data: Map[Tag, Set[Path]] = Map.empty) extends ImmutableTags[Tags] {
   override def +(fileWithTag: (Path, Tag)): Tags = {
     val (path, tag) = fileWithTag
     val oldPaths = data.getOrElse(tag, Set.empty)
@@ -22,7 +20,7 @@ case class Tags(version: String, root: Path, data: Map[Tag, Set[Path]] = Map.emp
     }
   }
   override def withVersion(version: Tag): Tags = copy(version = version)
-  override def withRoot(root: Path): Tags = copy(root = root)
+  override def withContext(context: Option[Context]): Tags = copy(context = context)
 
   override def allTags: Set[Tag] = data.keySet
   override def filesForTag(tag: Tag): Set[Path] = data.getOrElse(tag, Set.empty)

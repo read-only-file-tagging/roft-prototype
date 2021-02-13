@@ -12,7 +12,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
   override def version_=(version: Tag): Unit = {
     write(versionFile, version, createFolders = true)
   }
-  override def root_=(root: TagPath): Unit = ???
+  override def context_=(context: Option[Context]): Unit = ???
   override def version: String = {
     if (exists(versionFile) && versionFile.isFile) {
       read ! versionFile
@@ -20,7 +20,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
       ""
     }
   }
-  override def root: TagPath = ???
+  override def context: Option[Context] = None
   override def allTags: Set[Tag] = ???
   override def filesForTag(tag: Tag): Set[TagPath] = ???
   override def tagsForFile(file: TagPath): Set[Tag] = ???
