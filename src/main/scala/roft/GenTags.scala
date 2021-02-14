@@ -5,6 +5,7 @@ import roft.GenTags.{Path, Tag}
 trait GenTags[T <: ImmutableTags[T]] {
   def version: String
   def allTags: Set[Tag]
+  def knownPaths: Set[Path]
   def pathsForTag(tag: Tag): Set[Path]
   def tagsForPath(file: Path): Set[Tag]
   def entries: Iterable[(Path, Tag)] = for {
@@ -81,6 +82,7 @@ class Register[T <: ImmutableTags[T]](initialValue: ImmutableTags[T]) extends Mu
   }
   override def version: String = value.version
   override def allTags: Set[Tag] = value.allTags
+  override def knownPaths: Set[Path] = value.knownPaths
   override def pathsForTag(tag: Tag): Set[Path] = value.pathsForTag(tag)
   override def tagsForPath(file: Path): Set[Tag] = value.tagsForPath(file)
   override def snapshot: ImmutableTags[T] = value
@@ -101,6 +103,7 @@ class AtomicRegister[T <: ImmutableTags[T]](initialValue: ImmutableTags[T]) exte
   }
   override def version: String = value.get().version
   override def allTags: Set[Tag] = value.get().allTags
+  override def knownPaths: Set[Path] = value.get().knownPaths
   override def pathsForTag(tag: Tag): Set[Path] = value.get().pathsForTag(tag)
   override def tagsForPath(file: Path): Set[Tag] = value.get().tagsForPath(file)
   override def snapshot: ImmutableTags[T] = value.get()

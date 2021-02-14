@@ -8,6 +8,7 @@ case class Tags(version: String, data: Set[(Path, Tag)] = Set.empty) extends Imm
   override def withVersion(version: String): Tags = copy(version = version)
 
   override def allTags: Set[Tag] = data.map(_._2)
+  override def knownPaths: Set[Path] = data.map(_._1)
   override def pathsForTag(tag: Tag): Set[Path] = data.collect {
     case (file, `tag`) => file
   }

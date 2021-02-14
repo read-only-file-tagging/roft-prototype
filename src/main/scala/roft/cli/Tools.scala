@@ -23,6 +23,11 @@ object Tools {
     }
   }
 
+  def storePath2path(path: Path)(implicit context: Context, wd: WorkingDirectory): Path = {
+    import java.io.File
+    new File(context.root, path).getAbsolutePath
+  }
+
   def rescan[T <: ImmutableTags[T]]()(implicit store: MutableTags[T], context: Context, wd: WorkingDirectory): Unit = ???
   def allTags[T <: ImmutableTags[T]]()(implicit store: MutableTags[T]): Seq[String] = store.allTags.toVector.map(_.toString)
   def tag[T <: ImmutableTags[T]](path: String, tags: String*)(implicit store: MutableTags[T], context: Context, wd: WorkingDirectory): Boolean = {
@@ -33,6 +38,27 @@ object Tools {
         true
     }
   }
-  def filesByTag(query: String*)(implicit store: TagStore, context: Context, wd: WorkingDirectory): Seq[String] = ???
-  def tagsByFile(path: String, tagFilter: String*): Seq[String] = ???
+
+  def filesByTag(query: String*)(implicit store: TagStore, context: Context, wd: WorkingDirectory): Seq[String] =
+    if (query.isEmpty) {
+      store.entries
+        .map(_._1)
+        .toSet
+        .toVector
+        .map(storePath2path)
+    } else {
+      query
+        .map(q => store.pathsForTag(Tag.fromString(q)))
+        .reduce(_ intersect _)
+        .toVector
+        .map(storePath2path)
+    }
+
+  def tagsByFile(path: String)(implicit store: TagStore, context: Context, wd: WorkingDirectory): Seq[String] =
+    path2storePath(path).fold(Seq.empty[String]) {
+      sp =>
+        store.tagsForPath(sp)
+          .toVector
+          .map(_.toString)
+    }
 }
