@@ -4,7 +4,6 @@ import roft.GenTags.{Path, Tag}
 
 trait GenTags[T <: ImmutableTags[T]] {
   def version: String
-  def context: Option[Context]
   def allTags: Set[Tag]
   def PathsForTag(tag: Tag): Set[Path]
   def tagsForPath(file: Path): Set[Tag]
@@ -53,7 +52,6 @@ trait MutableTags[T <: ImmutableTags[T]] extends GenTags[T] {
   def +=(fileWithTag: (Path, Tag)): Unit
   def -=(fileWithTag: (Path, Tag)): Unit
   def version_=(version: String): Unit
-  def context_=(context: Option[Context]): Unit
   def replaceWith[A <: ImmutableTags[A]](immutableTags: ImmutableTags[A]): Unit
 }
 
@@ -61,7 +59,6 @@ trait ImmutableTags[T <: ImmutableTags[T]] extends GenTags[T] {
   def +(fileWithTag: (Path, Tag)): T
   def -(fileWithTag: (Path, Tag)): T
   def withVersion(version: String): T
-  def withContext(context: Option[Context]): T
 
   override def snapshot: ImmutableTags[T] = this
 }

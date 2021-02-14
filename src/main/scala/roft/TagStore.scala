@@ -34,9 +34,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
   override def +=(fileWithTag: (TagPath, Tag)): Unit = replaceWith(snapshot + fileWithTag)
   override def -=(fileWithTag: (TagPath, Tag)): Unit = replaceWith(snapshot - fileWithTag)
   override def version_=(version: String): Unit = replaceWith(snapshot.withVersion(version))
-  override def context_=(context: Option[Context]): Unit = replaceWith(snapshot.withContext(context))
   override def version: String = snapshot.version
-  override def context: Option[Context] = snapshot.context
   override def allTags: Set[Tag] = snapshot.allTags
   override def PathsForTag(tag: Tag): Set[TagPath] = snapshot.PathsForTag(tag)
   override def tagsForPath(file: TagPath): Set[Tag] = snapshot.tagsForPath(file)
