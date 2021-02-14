@@ -18,8 +18,8 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
       (read.lines ! tagsFile)
         .map {
           s =>
-            val Array(tagStr, pathStr) = s.split('\t')
-            Tag.fromString(tagStr) -> pathStr
+            val Array(pathStr,tagStr) = s.split('\t')
+            pathStr -> Tag.fromString(tagStr)
         }
     } else {
       Seq.empty
@@ -28,7 +28,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
   }
   override def replaceWith[A <: ImmutableTags[A]](immutableTags: ImmutableTags[A]): Unit = {
     write.over(versionFile, immutableTags.version, createFolders = true)
-    write.over(tagsFile, immutableTags.entries.map { case (tag, path) => s"$tag\t$path\n" }, createFolders = true)
+    write.over(tagsFile, immutableTags.entries.map { case (path, tag) => s"$path\t$tag\n" }, createFolders = true)
   }
 
   override def +=(fileWithTag: (TagPath, Tag)): Unit = replaceWith(snapshot + fileWithTag)
@@ -36,7 +36,7 @@ class TagStore(val dir: Path) extends MutableTags[Tags] {
   override def version_=(version: String): Unit = replaceWith(snapshot.withVersion(version))
   override def version: String = snapshot.version
   override def allTags: Set[Tag] = snapshot.allTags
-  override def PathsForTag(tag: Tag): Set[TagPath] = snapshot.PathsForTag(tag)
+  override def pathsForTag(tag: Tag): Set[TagPath] = snapshot.pathsForTag(tag)
   override def tagsForPath(file: TagPath): Set[Tag] = snapshot.tagsForPath(file)
 }
 
