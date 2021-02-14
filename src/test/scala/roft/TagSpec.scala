@@ -5,13 +5,13 @@ import roft.GenTags.Tag
 
 class TagSpec extends Specification {
   "a tags variable" >> {
-    var store = Tags("")
-
     "have a blank version" >> {
+      val store = Tags("")
       store.version must_== ""
     }
 
     "handle version updates" >> {
+      var store = Tags("")
       val newVersion = "test123"
       store.version must_!= newVersion
       store = store.withVersion(newVersion)
@@ -19,6 +19,7 @@ class TagSpec extends Specification {
     }
 
     "handles simple tag updates" >> {
+      var store = Tags("")
       store.tagsForPath("test") must_== Set()
       store += ("test" -> Tag("abc"))
       store.tagsForPath("test") must_== Set(Tag("abc"))
@@ -27,6 +28,7 @@ class TagSpec extends Specification {
     }
 
     "handles simple multiple tag updates" >> {
+      var store = Tags("")
       store += ("one" -> Tag("1"))
       store += ("one" -> Tag("one"))
       store += ("two" -> Tag("1"))
