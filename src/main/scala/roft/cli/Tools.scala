@@ -28,8 +28,9 @@ object Tools {
   }
 
   def storePath2path(path: Path)(implicit context: Context, wd: WorkingDirectory): Path = {
-    import java.io.File
-    new File(context.root, path).getAbsolutePath
+    import ammonite.ops.{Path => APath}
+    val absolute = APath(s"${wd.path}/$path")
+    absolute.relativeTo(APath(context.root)).toString()
   }
 
   def rescan[T <: ImmutableTags[T]]()(implicit store: MutableTags[T], context: Context, wd: WorkingDirectory): Unit = ???
@@ -43,7 +44,7 @@ object Tools {
     }
   }
 
-  def filesByTag(query: String*)(implicit store: TagStore, context: Context, wd: WorkingDirectory): Seq[String] =
+  def filesByTag[T <: ImmutableTags[T]](query: String*)(implicit store: MutableTags[T], context: Context, wd: WorkingDirectory): Seq[String] =
     if (query.isEmpty) {
       store.entries
         .map(_._1)
@@ -58,7 +59,7 @@ object Tools {
         .map(storePath2path)
     }
 
-  def tagsByFile(path: String)(implicit store: TagStore, context: Context, wd: WorkingDirectory): Seq[String] =
+  def tagsByFile[T <: ImmutableTags[T]](path: String)(implicit store: MutableTags[T], context: Context, wd: WorkingDirectory): Seq[String] =
     path2storePath(path).fold(Seq.empty[String]) {
       sp =>
         store.tagsForPath(sp)
