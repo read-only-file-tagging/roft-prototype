@@ -13,9 +13,13 @@ object Tools {
   }
 
   def path2storePath(path: Path)(implicit context: Context, wd: WorkingDirectory): Option[Path] = {
-    import java.io.File
-    val rootInAbsolutePath = new File(context.root).getAbsolutePath
-    val fileInAbsolutePath = new File(wd.path, path).getAbsolutePath
+    import ammonite.ops.{Path => APath}
+    val rootInAbsolutePath = APath(context.root).toString
+    val fileInAbsolutePath = if (path.startsWith("/")) {
+      path
+    } else {
+      APath(s"${wd.path}/$path").toString
+    }
     if (fileInAbsolutePath.startsWith(rootInAbsolutePath)) {
       Some(fileInAbsolutePath.substring(rootInAbsolutePath.length))
     } else {
