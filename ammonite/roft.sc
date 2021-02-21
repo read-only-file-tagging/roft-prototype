@@ -16,45 +16,69 @@ import _root_.roft.{Context, TagStore}
 
 
 @main
-def version() = {
+def version(): Unit = {
   val version = "prototype-0.1"
   println(s"ROFT version $version")
 }
 
+val RoftRoot = "ROFT_ROOT"
+val RoftStore = "ROFT_STORE"
+
+implicit val context: Context = {
+  val root = sys.env.getOrElse(RoftRoot, pwd.toString())
+  Context(root)
+}
+
+implicit val wd: WorkingDirectory = WorkingDirectory(pwd.toString())
+
+val storePath = sys.env.getOrElse(RoftStore, (pwd / ".roft-store").toString)
+implicit val store: TagStore = {
+  TagStore(new java.io.File(storePath))
+}
+
 @main
 def tag(path: String, tags: String*) = {
-  implicit val context: Context = Context(pwd.toString())
-  implicit val wd: WorkingDirectory = WorkingDirectory(pwd.toString())
-  val storePath = pwd / ".roft-store"
-  implicit val store: TagStore = TagStore(new java.io.File(storePath.toString()))
   Tools.tag(path, tags: _*)
 }
 
 @main
-def tags(path: String): Unit = {
-  implicit val context: Context = Context(pwd.toString())
-  implicit val wd: WorkingDirectory = WorkingDirectory(pwd.toString())
-  val storePath = pwd / ".roft-store"
-  implicit val store: TagStore = TagStore(new java.io.File(storePath.toString()))
-  println(Tools.tagsByFile(path) mkString "\n")
+def tags(path: Option[String]): Unit = {
+  path.fold(allTags()) {
+    p =>
+      println(Tools.tagsByFile(p) mkString "\n")
+  }
 }
 
 @main
+def allTags(): Unit = {
+  println(Tools.allTags() mkString "\n")
+}
+
+
+@main
 def search(query: String*): Unit = {
-  implicit val context: Context = Context(pwd.toString())
-  implicit val wd: WorkingDirectory = WorkingDirectory(pwd.toString())
-  val storePath = pwd / ".roft-store"
-  implicit val store: TagStore = TagStore(new java.io.File(storePath.toString()))
   println(Tools.filesByTag(query: _*) mkString "\n")
 }
 
 def scriptLocation: String = {
+  import ammonite.ops.RelPath
   val relStr = sys.props("sun.java.command").split("\\s+")(1)
-  (pwd / ammonite.ops.RelPath(relStr)).toString()
+  (pwd / RelPath(relStr)).toString()
 }
 
 @main
-def activate() = {
+def activate(store: Option[String], root: Option[String]): Unit = {
+  val finalRoot = root.getOrElse(context.root)
+  val finalStorePath = store.getOrElse(storePath)
+
   val q = "\""
-  println(s"alias roft=$q$scriptLocation$q")
+  println(s"alias roft=$q$scriptLocation$q;")
+  println(s"export $RoftRoot=$q$finalRoot$q;")
+  println(s"export $RoftStore=$q$finalStorePath$q;")
+}
+
+@main
+def info(): Unit = {
+  println(s"Context: $context")
+  println(s"Store path: $storePath")
 }
